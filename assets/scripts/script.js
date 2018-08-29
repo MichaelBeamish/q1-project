@@ -742,7 +742,7 @@ convertCountryCode = (code) => {
 }
 
 //ISS API
-const ISSURL = 'http://api.open-notify.org/iss-now.json';
+const ISSURL = 'https://api.wheretheiss.at/v1/satellites/25544';
 let issLat;
 let issLon;
 var myMap,
@@ -751,8 +751,8 @@ myPlacemark;
 axios.get(ISSURL)
     .then(results => {
         //GET ISS COORDINATES
-        issLat = results.data.iss_position.latitude;
-        issLon = results.data.iss_position.longitude;
+        issLat = results.data.latitude;
+        issLon = results.data.longitude;
         console.log(issLat, issLon);
         
         //LOAD MAP WITH ISS COORDINATES using https://tech.yandex.com/maps/doc/jsapi/2.1/quick-start/index-docpage/
