@@ -747,22 +747,26 @@ convertCountryCode = (code) => {
 //Page will always load ISS first.
 let objectID = '25544';
 
-//SATELITE POSITIONS API
+//API VARIABLES
 let objectAPIKey = 'HL2GHH-QXV5ZF-U6CVPA-3VMK';
 let mapquestAPIKey = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
 let objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
 let objectURLorbits = `https://www.n2yo.com/rest/v1/satellite/tle/${objectID}&apiKey=${objectAPIKey}`;
 
+//SAT POSITION VARIABLES
 let objectName;
 let objectLatitude;
 let objectLongitude;
 let coordinatesString;
 let objectAltitude;
 let objectVelocityMPH;
+
+//MAP VARIABLES
 let map;
 let objectIcon;
 let objectIconPlacement;
 let maploadedBoolean = false;
+let timerloadedBoolean = false;
 let timer;
 
 
@@ -782,6 +786,11 @@ axios.get(objectURL)
       if(maploadedBoolean === false){
         maploadedBoolean = true;
         loadMap();
+        loadIcon();
+        updateIconAndBalloon();
+      }
+      if(timerloadedBoolean === false){
+        timerloadedBoolean = true;
         //Call update function every 3 seconds.
         timer = setInterval(startUpdates, 3000);
       }
@@ -799,7 +808,7 @@ function calculateObjectSpeed(){
         let objectCircum = objectRadius * 2 * Math.PI;
         let objectOrbitsPerHour = Number(objectOrbitsPerDay) / 24;
         objectVelocityMPH = Math.round((objectCircum * objectOrbitsPerHour) * 100) / 100;
-        objectVelocityMPH = objectVelocityMPH.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        objectVelocityMPH = objectVelocityMPH.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); //Format number to include commas.
     })
   }
 
@@ -813,8 +822,11 @@ function loadMap(){
     layers: L.mapquest.tileLayer('map'),
     zoom: 5
   });
-  //ICON
-  objectIcon = L.icon({
+}
+
+function loadIcon(){
+    //ICON
+    objectIcon = L.icon({
       iconUrl: `assets/images/${objectID}.png`,
       iconSize: [60, 60],
       iconAnchor: [22, 94],
@@ -825,15 +837,15 @@ function loadMap(){
   });
 }
 
-function generateIcon(){
-  //GENERATE Marker
+function updateIconAndBalloon(){
+  //Add Marker
   objectIconPlacement = L.marker([objectLatitude, objectLongitude], {icon: objectIcon}).addTo(map);
   map.panTo([objectLatitude + 2, objectLongitude]);
-  //GENERATE POPUP
+  //Add Balloon
   //GET COUNTRY NAME using REVERSE GEOCODING API - https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
   axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=${mapquestAPIKey}&location=${objectLatitude},${objectLongitude}&includeRoadMetadata=true&includeNearestIntersection=true`)
       
-      //IF OBJECT IS OVER LAND
+      //IF OBJECT IS OVER A COUNTRY
       .then(mapresults => {
           //RETURNS COUNTRY AS 2 LETTER CODE
           let countryCode = mapresults.data.results[0].locations[0].adminArea1;
@@ -843,7 +855,7 @@ function generateIcon(){
           let fullCountName = convertCountryCode(countryCode);
           
           objectIconPlacement.bindPopup(`
-          <div class="baloon">
+          <div class="balloon">
             <h3>${objectName}</h3>
             <h4>Over ${cityName} ${stateName} ${fullCountName}</h4>
             <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img>
@@ -854,10 +866,10 @@ function generateIcon(){
           `).openPopup();
       })
 
-      //IF OBJECT IS OVER OCEAN
+      //IF OBJECT ISN'T OVER A COUNTRY
       .catch(mapresults => {
           objectIconPlacement.bindPopup(`
-          <div class="baloon">
+          <div class="balloon">
             <h3>${objectName}</h3>
             <h4>Not currently over a country.</h4>
             <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="100"></img>
@@ -869,31 +881,36 @@ function generateIcon(){
       })
 }
 
-//START UPDATE
+
+
+//START UPDATE PROCESS
 function startUpdates(){
   if(objectIconPlacement !== undefined){
     objectIconPlacement.remove(map);
   }
-  generateIcon();
+  updateIconAndBalloon();
   getObjectCoordinates();
 }
-//STOP UPDATES
+
+//STOP UPDATE PROCESS
 function stopUpdates() {
   clearInterval(timer);
 }
+
 
 //ADD EVENT LISTENERS TO OBJECT BUTTONS
 let buttons = document.querySelectorAll(".space-button");
 buttons.forEach(el => {
   el.addEventListener('click', (e) => {
     stopUpdates();
-    maploadedBoolean = false;
-    map.remove(map);
+    timerloadedBoolean = false;
     objectID = e.target.value;
     objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
     getObjectCoordinates();
+    loadIcon();
   })
 })
+
 
 //BEGIN!! First function called here.
 getObjectCoordinates();
