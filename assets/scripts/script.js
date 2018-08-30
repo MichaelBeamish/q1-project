@@ -799,6 +799,7 @@ function calculateObjectSpeed(){
         let objectCircum = objectRadius * 2 * Math.PI;
         let objectOrbitsPerHour = Number(objectOrbitsPerDay) / 24;
         objectVelocityMPH = Math.round((objectCircum * objectOrbitsPerHour) * 100) / 100;
+        objectVelocityMPH = objectVelocityMPH.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     })
   }
 
@@ -827,6 +828,7 @@ function loadMap(){
 function generateIcon(){
   //GENERATE Marker
   objectIconPlacement = L.marker([objectLatitude, objectLongitude], {icon: objectIcon}).addTo(map);
+  map.panTo([objectLatitude, objectLongitude]);
   //GENERATE POPUP
   //GET COUNTRY NAME using REVERSE GEOCODING API - https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
   axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=${mapquestAPIKey}&location=${objectLatitude},${objectLongitude}&includeRoadMetadata=true&includeNearestIntersection=true`)
@@ -846,7 +848,7 @@ function generateIcon(){
           <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img>
           <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
           <p><strong>SPEED:</strong> ${objectVelocityMPH} mph</p>
-          <p><strong>ALTITUDE:</strong> ${objectAltitude} miles above ${fullCountName}.</p>
+          <p><strong>ALTITUDE:</strong> ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</p>
           `).openPopup();
       })
 
@@ -858,7 +860,7 @@ function generateIcon(){
           <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="100"></img>
           <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
           <p><strong>SPEED:</strong> ${objectVelocityMPH} mph</p>
-          <p><strong>ALTITUDE:</strong> ${objectAltitude} miles above the Earth.</p>
+          <p><strong>ALTITUDE:</strong> ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</p>
           `).openPopup();
       })
 }
@@ -880,7 +882,6 @@ function stopUpdates() {
 let buttons = document.querySelectorAll(".space-button");
 buttons.forEach(el => {
   el.addEventListener('click', (e) => {
-    console.log(e.target.value);
     stopUpdates();
     maploadedBoolean = false;
     map.remove(map);
