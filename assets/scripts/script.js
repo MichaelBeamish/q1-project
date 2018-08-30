@@ -809,7 +809,7 @@ function loadMap(){
   // 'map' refers to a <div> element with the ID map
   L.mapquest.key = mapquestAPIKey;
   map = L.mapquest.map('map', {
-    center: [objectLatitude, objectLongitude],
+    center: [objectLatitude + 2, objectLongitude],
     layers: L.mapquest.tileLayer('map'),
     zoom: 5
   });
@@ -828,7 +828,7 @@ function loadMap(){
 function generateIcon(){
   //GENERATE Marker
   objectIconPlacement = L.marker([objectLatitude, objectLongitude], {icon: objectIcon}).addTo(map);
-  map.panTo([objectLatitude, objectLongitude]);
+  map.panTo([objectLatitude + 2, objectLongitude]);
   //GENERATE POPUP
   //GET COUNTRY NAME using REVERSE GEOCODING API - https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
   axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=${mapquestAPIKey}&location=${objectLatitude},${objectLongitude}&includeRoadMetadata=true&includeNearestIntersection=true`)
@@ -843,24 +843,28 @@ function generateIcon(){
           let fullCountName = convertCountryCode(countryCode);
           
           objectIconPlacement.bindPopup(`
-          <h3>${objectName}</h3>
-          <h4>Over ${cityName} ${stateName} ${fullCountName}</h4>
-          <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img>
-          <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
-          <p><strong>SPEED:</strong> ${objectVelocityMPH} mph</p>
-          <p><strong>ALTITUDE:</strong> ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</p>
+          <div class="baloon">
+            <h3>${objectName}</h3>
+            <h4>Over ${cityName} ${stateName} ${fullCountName}</h4>
+            <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img>
+            <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
+            <p><strong>SPEED:</strong> ${objectVelocityMPH} mph</p>
+            <p><strong>ALTITUDE:</strong> ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</p>
+          </div>
           `).openPopup();
       })
 
       //IF OBJECT IS OVER OCEAN
       .catch(mapresults => {
           objectIconPlacement.bindPopup(`
-          <h3>${objectName}</h3>
-          <h4>Not currently over a country.</h4>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="100"></img>
-          <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
-          <p><strong>SPEED:</strong> ${objectVelocityMPH} mph</p>
-          <p><strong>ALTITUDE:</strong> ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</p>
+          <div class="baloon">
+            <h3>${objectName}</h3>
+            <h4>Not currently over a country.</h4>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="100"></img>
+            <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
+            <p><strong>SPEED:</strong> ${objectVelocityMPH} mph</p>
+            <p><strong>ALTITUDE:</strong> ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</p>
+          </div>
           `).openPopup();
       })
 }

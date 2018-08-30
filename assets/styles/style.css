@@ -1,19 +1,54 @@
-header {
-    margin-top: 50px;
-    text-align: center;
-    background-color: blue;
+body {
+    background-color: black;
+    margin-left: 5em;
+    margin-right: 5em;
 }
 
-.flex-container {
+.container {
+    background-color: crimson;
+}
+
+header {
+    margin-top: 1em;
+    background-color: darkgreen;
+    height: 5em;
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+}
+
+h1 {
+    font-size: 50px;
+}
+
+footer {
+    background-color: darkgreen;
+    height: 5em;
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+    font-style: italic;
+}
+
+nav {
+    background-color: darkslategrey;
+    height: 5em;
+}
+
+.aligner {
     display: flex;
-    flex-direction: row;
+    align-items: center;
     justify-content: center;
-    background-color: green;
-    margin-bottom: 100px;
   }
 
-.map-style {
-    background-color: purple;
-    display: flex;
-    justify-content: center;
+button {
+    margin: 6em;
+    width: 10em;
+    height: 2em;
+    background-color: crimson;
+}
+
+.inner-container {
+    height: 90%;
+}
+
+.baloon {
 }
