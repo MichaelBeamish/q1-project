@@ -747,9 +747,6 @@ let issLat;
 let issLon;
 let issAlt;
 let issVel;
-let issTime;
-var myMap,
-myPlacemark;
 
 axios.get(ISSURL)
     .then(results => {
@@ -760,29 +757,30 @@ axios.get(ISSURL)
         issVel = results.data.velocity;
         issTime = results.data.timestamp;
         
-        //LOAD MAP WITH ISS COORDINATES using https://tech.yandex.com/maps/doc/jsapi/2.1/quick-start/index-docpage/
-        ymaps.ready(init);
+        //LOAD MAP WITH ISS COORDINATES using Mapquest https://developer.mapquest.com/documentation/mapquest-js/v1.3/
+        L.mapquest.key = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
 
-            function init(){     
-                myMap = new ymaps.Map("map", {
-                    center: [issLat, issLon],
-                    zoom: 7
-                });
+        // 'map' refers to a <div> element with the ID map
+        let map = L.mapquest.map('map', {
+          center: [issLat, issLon],
+          layers: L.mapquest.tileLayer('map'),
+          zoom: 4
+        });
 
-                myPlacemark = new ymaps.Placemark([issLat, issLon], { hintContent: 'ISS', balloonContent: 'Flying through space!' 
-                }, {iconLayout: 'default#image',
-                // Custom image for the placemark icon.
-                iconImageHref: 'assets/images/iss-icon.png',
-                // The size of the placemark.
-                iconImageSize: [50, 50],
-                /**
-                 * The offset of the upper left corner of the icon relative
-                 * to its "tail" (the anchor point).
-                 */
-                iconImageOffset: [-10, 0]});
+        let issIcon = L.icon({
+            iconUrl: 'assets/images/iss-icon.png',
+            iconSize: [50, 50],
+            iconAnchor: [22, 94],
+            popupAnchor: [-3, -76],
+            shadowUrl: 'assets/images/iss-icon.png',
+            shadowSize: [10, 10],
+            shadowAnchor: [22, 94]
+        });
+        let marker = L.marker([issLat, issLon], {icon: issIcon}).addTo(map);
+        marker.bindPopup('Hello World!').closePopup();
 
-                myMap.geoObjects.add(myPlacemark);
-            }
+        
+
 
         //GET COUNTRY NAME using https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
         axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=qIMsoHWGonAkGLA0afmJDHavRdrFNASo&location=${issLat},${issLon}&includeRoadMetadata=true&includeNearestIntersection=true`)
