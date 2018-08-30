@@ -744,20 +744,26 @@ convertCountryCode = (code) => {
   return isoCountries[code].name;
 }
 
+//Page will always load ISS first.
 let objectID = '25544';
 
 //SATELITE POSITIONS API
-const objectURL = `https://api.wheretheiss.at/v1/satellites/${objectID}`;
+let objectAPIKey = 'HL2GHH-QXV5ZF-U6CVPA-3VMK';
+let mapquestAPIKey = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
+let objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
+let objectURLorbits = `https://www.n2yo.com/rest/v1/satellite/tle/${objectID}&apiKey=${objectAPIKey}`;
 
+let objectName;
 let objectLatitude;
 let objectLongitude;
 let coordinatesString;
 let objectAltitude;
-let objectVelocity;
+let objectVelocityMPH;
 let map;
 let objectIcon;
 let objectIconPlacement;
 let maploadedBoolean = false;
+let timer;
 
 
 //FUNCTION TO GET OBJECT LAT & LNG...
@@ -765,32 +771,46 @@ function getObjectCoordinates(){
 axios.get(objectURL)
   .then(results => {
       //GET OBJECT COORDINATES
-      objectLatitude = results.data.latitude;
-      objectLongitude = results.data.longitude;
+      objectName = results.data.info.satname;
+      objectLatitude = results.data.positions[0].satlatitude;
+      objectLongitude = results.data.positions[0].satlongitude;
       coordinatesString = `${Math.round(objectLatitude * 100000) / 100000}, ${Math.round(objectLongitude * 100000) / 100000}`;
-      objectAltitude = Math.round((results.data.altitude * 0.621371) * 100) / 100;
-      objectVelocity = Math.round((results.data.velocity * 0.621371) * 100) / 100;
+      objectAltitude = Math.round((results.data.positions[0].sataltitude * 0.621371) * 100) / 100;
+      calculateObjectSpeed();
 
       //If the map has been loaded, don't load it again.
       if(maploadedBoolean === false){
         maploadedBoolean = true;
         loadMap();
-        generateIcon();
         //Call update function every 3 seconds.
-        setInterval(startUpdates, 3000);
+        timer = setInterval(startUpdates, 3000);
       }
   })
 }
+
+//CALCULATE OBJECT SPEED...
+function calculateObjectSpeed(){
+  axios.get(objectURLorbits)
+    .then(results => {
+        //GET OBJECT ORBITS
+        let objectOrbits = results.data.tle.split(' ');
+        let objectOrbitsPerDay = objectOrbits[objectOrbits.length - 1];
+        let objectRadius = 3950 + objectAltitude;
+        let objectCircum = objectRadius * 2 * Math.PI;
+        let objectOrbitsPerHour = Number(objectOrbitsPerDay) / 24;
+        objectVelocityMPH = Math.round((objectCircum * objectOrbitsPerHour) * 100) / 100;
+    })
+  }
 
 function loadMap(){
   //LOAD MAP WITH OBJECT COORDINATES using Mapquest https://developer.mapquest.com/documentation/mapquest-js/v1.3/
   //API DOCUMENTATION https://leafletjs.com/reference-1.3.0.html
   // 'map' refers to a <div> element with the ID map
-  const mapquestKey = L.mapquest.key = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
+  L.mapquest.key = mapquestAPIKey;
   map = L.mapquest.map('map', {
     center: [objectLatitude, objectLongitude],
     layers: L.mapquest.tileLayer('map'),
-    zoom: 6
+    zoom: 5
   });
   //ICON
   objectIcon = L.icon({
@@ -809,7 +829,7 @@ function generateIcon(){
   objectIconPlacement = L.marker([objectLatitude, objectLongitude], {icon: objectIcon}).addTo(map);
   //GENERATE POPUP
   //GET COUNTRY NAME using REVERSE GEOCODING API - https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
-  axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=qIMsoHWGonAkGLA0afmJDHavRdrFNASo&location=${objectLatitude},${objectLongitude}&includeRoadMetadata=true&includeNearestIntersection=true`)
+  axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=${mapquestAPIKey}&location=${objectLatitude},${objectLongitude}&includeRoadMetadata=true&includeNearestIntersection=true`)
       
       //IF OBJECT IS OVER LAND
       .then(mapresults => {
@@ -821,11 +841,11 @@ function generateIcon(){
           let fullCountName = convertCountryCode(countryCode);
           
           objectIconPlacement.bindPopup(`
-          <h3>International Space Station</h3>
+          <h3>${objectName}</h3>
           <h4>Over ${cityName} ${stateName} ${fullCountName}</h4>
           <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img>
           <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
-          <p><strong>SPEED:</strong> ${objectVelocity} mph</p>
+          <p><strong>SPEED:</strong> ${objectVelocityMPH} mph</p>
           <p><strong>ALTITUDE:</strong> ${objectAltitude} miles above ${fullCountName}.</p>
           `).openPopup();
       })
@@ -833,22 +853,42 @@ function generateIcon(){
       //IF OBJECT IS OVER OCEAN
       .catch(mapresults => {
           objectIconPlacement.bindPopup(`
-          <h3>International Space Station</h3>
-          <h4>Over the ocean.</h4>
+          <h3>${objectName}</h3>
+          <h4>Not currently over a country.</h4>
           <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="100"></img>
           <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
-          <p><strong>SPEED:</strong> ${objectVelocity} mph</p>
-          <p><strong>ALTITUDE:</strong> ${objectAltitude} miles above the ocean.</p>
+          <p><strong>SPEED:</strong> ${objectVelocityMPH} mph</p>
+          <p><strong>ALTITUDE:</strong> ${objectAltitude} miles above the Earth.</p>
           `).openPopup();
       })
 }
 
+//START UPDATE
+function startUpdates(){
+  if(objectIconPlacement !== undefined){
+    objectIconPlacement.remove(map);
+  }
+  generateIcon();
+  getObjectCoordinates();
+}
+//STOP UPDATES
+function stopUpdates() {
+  clearInterval(timer);
+}
+
+//ADD EVENT LISTENERS TO OBJECT BUTTONS
+let buttons = document.querySelectorAll(".space-button");
+buttons.forEach(el => {
+  el.addEventListener('click', (e) => {
+    console.log(e.target.value);
+    stopUpdates();
+    maploadedBoolean = false;
+    map.remove(map);
+    objectID = e.target.value;
+    objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
+    getObjectCoordinates();
+  })
+})
+
 //BEGIN!! First function called here.
 getObjectCoordinates();
-
-//UPDATE
-function startUpdates(){
-  objectIconPlacement.remove(map);
-  getObjectCoordinates();
-  generateIcon();
-}
