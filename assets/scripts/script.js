@@ -745,6 +745,9 @@ convertCountryCode = (code) => {
 const ISSURL = 'https://api.wheretheiss.at/v1/satellites/25544';
 let issLat;
 let issLon;
+let issAlt;
+let issVel;
+let issTime;
 var myMap,
 myPlacemark;
 
@@ -753,7 +756,9 @@ axios.get(ISSURL)
         //GET ISS COORDINATES
         issLat = results.data.latitude;
         issLon = results.data.longitude;
-        console.log(issLat, issLon);
+        issAlt = results.data.altitude;
+        issVel = results.data.velocity;
+        issTime = results.data.timestamp;
         
         //LOAD MAP WITH ISS COORDINATES using https://tech.yandex.com/maps/doc/jsapi/2.1/quick-start/index-docpage/
         ymaps.ready(init);
@@ -761,7 +766,7 @@ axios.get(ISSURL)
             function init(){     
                 myMap = new ymaps.Map("map", {
                     center: [issLat, issLon],
-                    zoom: 4
+                    zoom: 7
                 });
 
                 myPlacemark = new ymaps.Placemark([issLat, issLon], { hintContent: 'ISS', balloonContent: 'Flying through space!' 
@@ -769,7 +774,7 @@ axios.get(ISSURL)
                 // Custom image for the placemark icon.
                 iconImageHref: 'assets/images/iss-icon.png',
                 // The size of the placemark.
-                iconImageSize: [25, 25],
+                iconImageSize: [50, 50],
                 /**
                  * The offset of the upper left corner of the icon relative
                  * to its "tail" (the anchor point).
@@ -784,15 +789,33 @@ axios.get(ISSURL)
             .then(mapresults => {
                 //RETURNS COUNTRY AS 2 LETTER CODE
                 let countCode = mapresults.data.results[0].locations[0].adminArea1;
+                let stateName = mapresults.data.results[0].locations[0].adminArea3;
+                let cityName = mapresults.data.results[0].locations[0].adminArea5;
                 //CONVERTS CODE TO FULL COUNTRY NAME
-                console.log(convertCountryCode(countCode));
+                console.log(cityName, stateName, convertCountryCode(countCode));
                 //USE CODE TO GET FLAG using https://countryflags.io/
-                document.getElementById('country-flag').innerHTML = `<img src="https://www.countryflags.io/${countCode.toLowerCase()}/shiny/64.png"></img>`;
+                document.getElementById('iss-info').innerHTML = `
+                <img src="https://www.countryflags.io/${countCode.toLowerCase()}/shiny/64.png"></img>
+                <ul>
+                    <li>LOCATION: Over ${cityName} ${stateName} ${convertCountryCode(countCode)}</li>
+                    <li>COORDINATES: ${issLat}, ${issLon}</li>
+                    <li>SPEED: ${Math.round((issVel * 0.621371) * 100) / 100} mph</li>
+                    <li>ALTITUDE: ${Math.round((issAlt * 0.621371) * 100) / 100} miles above the Earth</li>
+                </ul>
+                `;
             })
             //IF ISS ISN'T OVER A COUNTRY
             .catch(mapresults => {
                 console.log("The ISS is not over land.")
                 //MAKE FLAG IMAGE OF WAVES
-                document.getElementById('country-flag').innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="100"></img>`;
+                document.getElementById('iss-info').innerHTML = `
+                <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="100"></img>
+                <ul>
+                    <li>LOCATION: Over the ocean.</li>
+                    <li>COORDINATES: ${issLat}, ${issLon}</li>
+                    <li>SPEED: ${Math.round((issVel * 0.621371) * 100) / 100} mph</li>
+                    <li>ALTITUDE: ${Math.round((issAlt * 0.621371) * 100) / 100} miles above the Earth</li>
+                </ul>
+                `;
             })
     })

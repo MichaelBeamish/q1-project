@@ -1,0 +1,27 @@
+header {
+    margin-top: 50px;
+    text-align: center;
+    background-color: blue;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    background-color: green;
+    margin-bottom: 100px;
+  }
+
+.data-style {
+    background-color: red;
+    width: 500px;
+    padding: 50px;
+}
+
+.map-style {
+    background-color: purple;
+    display: flex;
+    justify-content: center;
+    width: 1300px;
+}

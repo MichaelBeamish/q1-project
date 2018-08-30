@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Q1 Project</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Where is the ISS?</title>
     <link rel="stylesheet" type="text/css" media="screen" href="assets/styles/style.css" />
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://api-maps.yandex.ru/2.1/?lang=en_US" type="text/javascript"></script>
@@ -12,8 +12,25 @@
 </head>
 <body>
 
-    <span id="country-flag"></span>
-    <div id="map" style="width: 800px; height: 600px"></div>
+    <div class="container">
+        
+        <header>
+            <h1>ISS TRACKER</h1>
+        </header>
+
+        <main class="flex-container">
+
+            <section class="map-style">
+                <div id="map" style="width: 1200px; height: 800px"></div>
+            </section>
+
+            <aside class="data-style">
+                <div id="iss-info"></div>
+            </aside>
+
+        </main>
+
+    </div>
     
 </body>
 </html>
