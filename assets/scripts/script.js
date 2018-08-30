@@ -744,35 +744,36 @@ convertCountryCode = (code) => {
   return isoCountries[code].name;
 }
 
-//ISS API
-const ISSURL = 'https://api.wheretheiss.at/v1/satellites/25544';
-const mapquestKey = L.mapquest.key = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
+let objectID = '25544';
 
-let issLat;
-let issLon;
-let coordsFormatted;
-let issAlt;
-let issVel;
+//SATELITE POSITIONS API
+const objectURL = `https://api.wheretheiss.at/v1/satellites/${objectID}`;
+
+let objectLatitude;
+let objectLongitude;
+let coordinatesString;
+let objectAltitude;
+let objectVelocity;
 let map;
-let issIcon;
-let marker;
-let maploaded = false;
+let objectIcon;
+let objectIconPlacement;
+let maploadedBoolean = false;
 
 
-//FUNCTION TO GET ISS LAT & LNG...
-function getISSCords(){
-axios.get(ISSURL)
+//FUNCTION TO GET OBJECT LAT & LNG...
+function getObjectCoordinates(){
+axios.get(objectURL)
   .then(results => {
-      //GET ISS COORDINATES
-      issLat = results.data.latitude;
-      issLon = results.data.longitude;
-      coordsFormatted = `${Math.round(issLat * 100000) / 100000}, ${Math.round(issLon * 100000) / 100000}`;
-      issAlt = Math.round((results.data.altitude * 0.621371) * 100) / 100;
-      issVel = Math.round((results.data.velocity * 0.621371) * 100) / 100;
+      //GET OBJECT COORDINATES
+      objectLatitude = results.data.latitude;
+      objectLongitude = results.data.longitude;
+      coordinatesString = `${Math.round(objectLatitude * 100000) / 100000}, ${Math.round(objectLongitude * 100000) / 100000}`;
+      objectAltitude = Math.round((results.data.altitude * 0.621371) * 100) / 100;
+      objectVelocity = Math.round((results.data.velocity * 0.621371) * 100) / 100;
 
       //If the map has been loaded, don't load it again.
-      if(maploaded === false){
-        maploaded = true;
+      if(maploadedBoolean === false){
+        maploadedBoolean = true;
         loadMap();
         generateIcon();
         //Call update function every 3 seconds.
@@ -782,34 +783,35 @@ axios.get(ISSURL)
 }
 
 function loadMap(){
-  //LOAD MAP WITH ISS COORDINATES using Mapquest https://developer.mapquest.com/documentation/mapquest-js/v1.3/
+  //LOAD MAP WITH OBJECT COORDINATES using Mapquest https://developer.mapquest.com/documentation/mapquest-js/v1.3/
   //API DOCUMENTATION https://leafletjs.com/reference-1.3.0.html
   // 'map' refers to a <div> element with the ID map
+  const mapquestKey = L.mapquest.key = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
   map = L.mapquest.map('map', {
-    center: [issLat, issLon],
+    center: [objectLatitude, objectLongitude],
     layers: L.mapquest.tileLayer('map'),
     zoom: 6
   });
   //ICON
-  issIcon = L.icon({
-      iconUrl: 'assets/images/iss-icon.png',
+  objectIcon = L.icon({
+      iconUrl: `assets/images/${objectID}.png`,
       iconSize: [60, 60],
       iconAnchor: [22, 94],
       popupAnchor: [-3, -76],
-      shadowUrl: 'assets/images/iss-icon.png',
+      shadowUrl: `assets/images/${objectID}.png`,
       shadowSize: [15, 15],
       shadowAnchor: [15, 15]
   });
 }
 
 function generateIcon(){
-  //GENERATE MARKER
-  marker = L.marker([issLat, issLon], {icon: issIcon}).addTo(map);
+  //GENERATE Marker
+  objectIconPlacement = L.marker([objectLatitude, objectLongitude], {icon: objectIcon}).addTo(map);
   //GENERATE POPUP
   //GET COUNTRY NAME using REVERSE GEOCODING API - https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
-  axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=qIMsoHWGonAkGLA0afmJDHavRdrFNASo&location=${issLat},${issLon}&includeRoadMetadata=true&includeNearestIntersection=true`)
+  axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=qIMsoHWGonAkGLA0afmJDHavRdrFNASo&location=${objectLatitude},${objectLongitude}&includeRoadMetadata=true&includeNearestIntersection=true`)
       
-      //IF ISS IS OVER LAND
+      //IF OBJECT IS OVER LAND
       .then(mapresults => {
           //RETURNS COUNTRY AS 2 LETTER CODE
           let countryCode = mapresults.data.results[0].locations[0].adminArea1;
@@ -818,35 +820,35 @@ function generateIcon(){
           //CONVERTS ABBREVIATION TO FULL COUNTRY NAME
           let fullCountName = convertCountryCode(countryCode);
           
-          marker.bindPopup(`
+          objectIconPlacement.bindPopup(`
           <h3>International Space Station</h3>
           <h4>Over ${cityName} ${stateName} ${fullCountName}</h4>
           <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img>
-          <p><strong>COORDINATES:</strong> ${coordsFormatted}</p>
-          <p><strong>SPEED:</strong> ${issVel} mph</p>
-          <p><strong>ALTITUDE:</strong> ${issAlt} miles above ${fullCountName}.</p>
+          <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
+          <p><strong>SPEED:</strong> ${objectVelocity} mph</p>
+          <p><strong>ALTITUDE:</strong> ${objectAltitude} miles above ${fullCountName}.</p>
           `).openPopup();
       })
 
-      //IF ISS IS OVER OCEAN
+      //IF OBJECT IS OVER OCEAN
       .catch(mapresults => {
-          marker.bindPopup(`
+          objectIconPlacement.bindPopup(`
           <h3>International Space Station</h3>
           <h4>Over the ocean.</h4>
           <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="100"></img>
-          <p><strong>COORDINATES:</strong> ${coordsFormatted}</p>
-          <p><strong>SPEED:</strong> ${issVel} mph</p>
-          <p><strong>ALTITUDE:</strong> ${issAlt} miles above the ocean.</p>
+          <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
+          <p><strong>SPEED:</strong> ${objectVelocity} mph</p>
+          <p><strong>ALTITUDE:</strong> ${objectAltitude} miles above the ocean.</p>
           `).openPopup();
       })
 }
 
 //BEGIN!! First function called here.
-getISSCords();
+getObjectCoordinates();
 
 //UPDATE
 function startUpdates(){
-  marker.remove(map);
-  getISSCords();
+  objectIconPlacement.remove(map);
+  getObjectCoordinates();
   generateIcon();
 }
