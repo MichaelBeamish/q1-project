@@ -18,6 +18,8 @@ header {
 
 h1 {
     font-size: 50px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-style: oblique;
 }
 
 footer {
@@ -51,4 +53,11 @@ button {
 }
 
 .balloon {
+    text-align: center;
+}
+
+#map {
+    border: 5px;
+    border-style: groove;
+    border-radius: 5px;
 }

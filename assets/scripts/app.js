@@ -746,6 +746,7 @@ convertCountryCode = (code) => {
 
 //Page will always load ISS first.
 let objectID = '25544';
+let objectWiki = 'ISS';
 
 //API VARIABLES
 let objectAPIKey = 'HL2GHH-QXV5ZF-U6CVPA-3VMK';
@@ -760,6 +761,7 @@ let objectLongitude;
 let coordinatesString;
 let objectAltitude;
 let objectVelocityMPH;
+let objectVelocityMPS;
 
 //MAP VARIABLES
 let map;
@@ -808,7 +810,9 @@ function calculateObjectSpeed(){
         let objectCircum = objectRadius * 2 * Math.PI;
         let objectOrbitsPerHour = Number(objectOrbitsPerDay) / 24;
         objectVelocityMPH = Math.round((objectCircum * objectOrbitsPerHour) * 100) / 100;
+        objectVelocityMPS = Math.round((objectVelocityMPH / 3600) * 100) / 100;
         objectVelocityMPH = objectVelocityMPH.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); //Format number to include commas.
+        objectVelocityMPS = objectVelocityMPS.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     })
   }
 
@@ -856,12 +860,12 @@ function updateIconAndBalloon(){
           
           objectIconPlacement.bindPopup(`
           <div class="balloon">
-            <h3>${objectName}</h3>
+            <h3><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
             <h4>Over ${cityName} ${stateName} ${fullCountName}</h4>
-            <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img>
-            <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
-            <p><strong>SPEED:</strong> ${objectVelocityMPH} mph</p>
-            <p><strong>ALTITUDE:</strong> ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</p>
+            <a href="https://en.wikipedia.org/wiki/${fullCountName}" target="_blank"><img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img></a>
+            <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
+            <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <b>---</b> <em>${objectVelocityMPS} mi/s</em></p>
+            <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</em></p>
           </div>
           `).openPopup();
       })
@@ -870,12 +874,12 @@ function updateIconAndBalloon(){
       .catch(mapresults => {
           objectIconPlacement.bindPopup(`
           <div class="balloon">
-            <h3>${objectName}</h3>
+            <h3><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
             <h4>Not currently over a country.</h4>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="100"></img>
-            <p><strong>COORDINATES:</strong> ${coordinatesString}</p>
-            <p><strong>SPEED:</strong> ${objectVelocityMPH} mph</p>
-            <p><strong>ALTITUDE:</strong> ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</p>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="64"></img>
+            <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
+            <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <b>---</b> <em>${objectVelocityMPS} mi/s</em></p>
+            <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</em></p>
           </div>
           `).openPopup();
       })
@@ -904,6 +908,7 @@ buttons.forEach(el => {
   el.addEventListener('click', (e) => {
     stopUpdates();
     timerloadedBoolean = false;
+    objectWiki = e.target.name;
     objectID = e.target.value;
     objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
     getObjectCoordinates();
