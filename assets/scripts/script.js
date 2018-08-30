@@ -1,4 +1,4 @@
-//ALL COUNTRY CODES - FULL NAME
+//ALL COUNTRY ABREVIATIONS TO FULL NAME
 const isoCountries = {
   'AF' : {
     name: 'Afghanistan',
@@ -346,7 +346,10 @@ const isoCountries = {
     name: 'Kiribati',
   },
   'KR' : {
-    name: 'Korea',
+    name: 'South Korea',
+  },
+  'KP' : {
+    name: 'North Korea',
   },
   'KW' : {
     name: 'Kuwait',
@@ -755,6 +758,7 @@ let issIcon;
 let marker;
 let maploaded = false;
 
+
 //FUNCTION TO GET ISS LAT & LNG...
 function getISSCords(){
 axios.get(ISSURL)
@@ -765,10 +769,13 @@ axios.get(ISSURL)
       coordsFormatted = `${Math.round(issLat * 100000) / 100000}, ${Math.round(issLon * 100000) / 100000}`;
       issAlt = Math.round((results.data.altitude * 0.621371) * 100) / 100;
       issVel = Math.round((results.data.velocity * 0.621371) * 100) / 100;
+
+      //If the map has been loaded, don't load it again.
       if(maploaded === false){
         maploaded = true;
         loadMap();
-        generatePopUp();
+        generateIcon();
+        //Call update function every 3 seconds.
         setInterval(startUpdates, 3000);
       }
   })
@@ -776,6 +783,7 @@ axios.get(ISSURL)
 
 function loadMap(){
   //LOAD MAP WITH ISS COORDINATES using Mapquest https://developer.mapquest.com/documentation/mapquest-js/v1.3/
+  //API DOCUMENTATION https://leafletjs.com/reference-1.3.0.html
   // 'map' refers to a <div> element with the ID map
   map = L.mapquest.map('map', {
     center: [issLat, issLon],
@@ -794,10 +802,10 @@ function loadMap(){
   });
 }
 
-function generatePopUp(){
-  //MARKER
+function generateIcon(){
+  //GENERATE MARKER
   marker = L.marker([issLat, issLon], {icon: issIcon}).addTo(map);
-  //GENERATE MARKER POPUP
+  //GENERATE POPUP
   //GET COUNTRY NAME using REVERSE GEOCODING API - https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
   axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=qIMsoHWGonAkGLA0afmJDHavRdrFNASo&location=${issLat},${issLon}&includeRoadMetadata=true&includeNearestIntersection=true`)
       
@@ -833,11 +841,12 @@ function generatePopUp(){
       })
 }
 
-
+//BEGIN!! First function called here.
 getISSCords();
 
+//UPDATE
 function startUpdates(){
   marker.remove(map);
   getISSCords();
-  generatePopUp();
+  generateIcon();
 }
