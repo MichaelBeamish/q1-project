@@ -743,77 +743,76 @@ convertCountryCode = (code) => {
 
 //ISS API
 const ISSURL = 'https://api.wheretheiss.at/v1/satellites/25544';
-let issLat;
-let issLon;
-let issAlt;
-let issVel;
+const mapquestKey = L.mapquest.key = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
+let marker;
 
 axios.get(ISSURL)
     .then(results => {
         //GET ISS COORDINATES
-        issLat = results.data.latitude;
-        issLon = results.data.longitude;
-        issAlt = results.data.altitude;
-        issVel = results.data.velocity;
-        issTime = results.data.timestamp;
+        let issLat = results.data.latitude;
+        let issLon = results.data.longitude;
+        let coordsFormatted = `${Math.round(issLat * 100000) / 100000}, ${Math.round(issLon * 100000) / 100000}`;
+        let issAlt = Math.round((results.data.altitude * 0.621371) * 100) / 100;
+        let issVel = Math.round((results.data.velocity * 0.621371) * 100) / 100;
         
         //LOAD MAP WITH ISS COORDINATES using Mapquest https://developer.mapquest.com/documentation/mapquest-js/v1.3/
-        L.mapquest.key = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
-
         // 'map' refers to a <div> element with the ID map
         let map = L.mapquest.map('map', {
           center: [issLat, issLon],
           layers: L.mapquest.tileLayer('map'),
           zoom: 4
         });
-
+        //ICON
         let issIcon = L.icon({
             iconUrl: 'assets/images/iss-icon.png',
-            iconSize: [50, 50],
+            iconSize: [60, 60],
             iconAnchor: [22, 94],
             popupAnchor: [-3, -76],
             shadowUrl: 'assets/images/iss-icon.png',
-            shadowSize: [10, 10],
-            shadowAnchor: [22, 94]
+            shadowSize: [15, 15],
+            shadowAnchor: [0, 0]
         });
-        let marker = L.marker([issLat, issLon], {icon: issIcon}).addTo(map);
-        marker.bindPopup('Hello World!').closePopup();
-
+        //MARKER
+        marker = L.marker([issLat, issLon], {icon: issIcon}).addTo(map);
         
 
-
-        //GET COUNTRY NAME using https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
+        //GENERATE MARKER POPUP
+        //GET COUNTRY NAME using REVERSE GEOCODING API - https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
         axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=qIMsoHWGonAkGLA0afmJDHavRdrFNASo&location=${issLat},${issLon}&includeRoadMetadata=true&includeNearestIntersection=true`)
+            
+            //IF ISS IS OVER LAND
             .then(mapresults => {
                 //RETURNS COUNTRY AS 2 LETTER CODE
-                let countCode = mapresults.data.results[0].locations[0].adminArea1;
+                let countryCode = mapresults.data.results[0].locations[0].adminArea1;
+                console.log('Country Abbreviation:', countryCode);
                 let stateName = mapresults.data.results[0].locations[0].adminArea3;
                 let cityName = mapresults.data.results[0].locations[0].adminArea5;
-                //CONVERTS CODE TO FULL COUNTRY NAME
-                console.log(cityName, stateName, convertCountryCode(countCode));
-                //USE CODE TO GET FLAG using https://countryflags.io/
-                document.getElementById('iss-info').innerHTML = `
-                <img src="https://www.countryflags.io/${countCode.toLowerCase()}/shiny/64.png"></img>
-                <ul>
-                    <li>LOCATION: Over ${cityName} ${stateName} ${convertCountryCode(countCode)}</li>
-                    <li>COORDINATES: ${issLat}, ${issLon}</li>
-                    <li>SPEED: ${Math.round((issVel * 0.621371) * 100) / 100} mph</li>
-                    <li>ALTITUDE: ${Math.round((issAlt * 0.621371) * 100) / 100} miles above the Earth</li>
-                </ul>
-                `;
+                //CONVERTS ABBREVIATION TO FULL COUNTRY NAME
+                let fullCountName = convertCountryCode(countryCode);
+                
+                marker.bindPopup(`
+                <h3>International Space Station</h3>
+                <h4>Over ${cityName} ${stateName} ${fullCountName}</h4>
+                <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img>
+                <p><strong>COORDINATES:</strong> ${coordsFormatted}</p>
+                <p><strong>SPEED:</strong> ${issVel} mph</p>
+                <p><strong>ALTITUDE:</strong> ${issAlt} miles above ${fullCountName}.</p>
+                `).closePopup();
             })
-            //IF ISS ISN'T OVER A COUNTRY
+
+            //IF ISS IS OVER OCEAN
             .catch(mapresults => {
-                console.log("The ISS is not over land.")
-                //MAKE FLAG IMAGE OF WAVES
-                document.getElementById('iss-info').innerHTML = `
+                marker.bindPopup(`
+                <h3>International Space Station</h3>
+                <h4>Over the ocean.</h4>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="100"></img>
-                <ul>
-                    <li>LOCATION: Over the ocean.</li>
-                    <li>COORDINATES: ${issLat}, ${issLon}</li>
-                    <li>SPEED: ${Math.round((issVel * 0.621371) * 100) / 100} mph</li>
-                    <li>ALTITUDE: ${Math.round((issAlt * 0.621371) * 100) / 100} miles above the Earth</li>
-                </ul>
-                `;
+                <p><strong>COORDINATES:</strong> ${coordsFormatted}</p>
+                <p><strong>SPEED:</strong> ${issVel} mph</p>
+                <p><strong>ALTITUDE:</strong> ${issAlt} miles above the ocean.</p>
+                `).closePopup();
             })
     })
+
+    // document.getElementById('the-button').addEventListener('click', () => {
+    //   console.log('gack!');
+    // })
