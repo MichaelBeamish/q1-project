@@ -744,17 +744,10 @@ convertCountryCode = (code) => {
   return isoCountries[code].name;
 }
 
+//SATELLITE VARIABLES
 //Page will always load ISS first.
 let objectID = '25544';
 let objectWiki = 'ISS';
-
-//API VARIABLES
-let objectAPIKey = 'HL2GHH-QXV5ZF-U6CVPA-3VMK';
-let mapquestAPIKey = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
-let objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
-let objectURLorbits = `https://www.n2yo.com/rest/v1/satellite/tle/${objectID}&apiKey=${objectAPIKey}`;
-
-//SATELLITE VARIABLES
 let objectName;
 let objectLatitude;
 let objectLongitude;
@@ -762,6 +755,13 @@ let coordinatesString;
 let objectAltitude;
 let objectVelocityMPH;
 let objectVelocityMPS;
+
+//API KEYS
+let objectAPIKey = 'HL2GHH-QXV5ZF-U6CVPA-3VMK';
+let mapquestAPIKey = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
+//URLs
+let objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
+let objectURLorbits = `https://www.n2yo.com/rest/v1/satellite/tle/${objectID}&apiKey=${objectAPIKey}`;
 
 //MAP VARIABLES
 let map;
@@ -772,11 +772,10 @@ let timerloadedBoolean = false;
 let timer;
 let balloonOpen = false;
 
-//FUNCTION TO GET OBJECT LAT & LNG...
+//GET OBJECT LATITUDE & LONGITUDE:
 function getObjectCoordinates(){
 axios.get(objectURL)
   .then(results => {
-      //GET OBJECT COORDINATES
       //Example (ISS): https://www.n2yo.com/rest/v1/satellite/positions/25544/0/0/0/1/&apiKey=HL2GHH-QXV5ZF-U6CVPA-3VMK
       objectName = results.data.info.satname;
       objectLatitude = results.data.positions[0].satlatitude;
@@ -806,7 +805,7 @@ axios.get(objectURL)
   })
 }
 
-//CALCULATE OBJECT SPEED...
+//CALCULATE OBJECT SPEED:
 function calculateObjectSpeed(){
   axios.get(objectURLorbits)
     .then(results => {
@@ -837,7 +836,7 @@ function calculateObjectSpeed(){
   }
 
 
-//LOAD MAP
+//LOAD MAP:
 function loadMap(){
   //Mapquest API https://developer.mapquest.com/documentation/mapquest-js/v1.3/
   //API DOCUMENTATION https://leafletjs.com/reference-1.3.0.html
@@ -850,7 +849,7 @@ function loadMap(){
   });
 }
 
-//CREATE ICON
+//CREATE ICON:
 function createIcon(){
     objectIcon = L.icon({
       iconUrl: `assets/images/${objectID}.png`,
@@ -863,7 +862,7 @@ function createIcon(){
   });
 }
 
-//LOAD ICON and BALLOON
+//LOAD ICON and BALLOON:
 function loadIconAndBalloon(){
   //Place Icon
   objectIconPlacement = L.marker([objectLatitude, objectLongitude], {icon: objectIcon}).addTo(map);
@@ -874,7 +873,6 @@ function loadIconAndBalloon(){
     balloonOpen = !balloonOpen;
   })
   
-
   //Pan map to the icon
   map.panTo([objectLatitude + 2, objectLongitude]);
   
@@ -907,7 +905,6 @@ function loadIconAndBalloon(){
           </div>
           `);
           
-
           //If boolean is true, this balloon will be displayed.
           if(balloonOpen === true){
             objectIconPlacement.openPopup();
@@ -928,7 +925,6 @@ function loadIconAndBalloon(){
           </div>
           `);
 
-
           //If boolean is true, this balloon will be displayed.
           if(balloonOpen === true){
             objectIconPlacement.openPopup();
@@ -937,7 +933,7 @@ function loadIconAndBalloon(){
 }
 
 
-
+//UPDATE OBJECT POSITION:
 //This update function is called every 3 seconds when active.
 function startUpdates(){
   //It first removes the icon and it's balloon from the map if there is one...
