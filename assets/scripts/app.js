@@ -770,7 +770,7 @@ let objectIconPlacement;
 let maploadedBoolean = false;
 let timerloadedBoolean = false;
 let timer;
-
+let balloonOpen = false;
 
 //FUNCTION TO GET OBJECT LAT & LNG...
 function getObjectCoordinates(){
@@ -864,6 +864,14 @@ function createIcon(){
 function loadIconAndBalloon(){
   //Place Icon
   objectIconPlacement = L.marker([objectLatitude, objectLongitude], {icon: objectIcon}).addTo(map);
+  //Add an event listener to the icon.
+  //If it is clicked a boolean switches value.
+  //This boolean decides if the balloon will be open or closed.
+  objectIconPlacement.addEventListener('click', () => {
+    balloonOpen = !balloonOpen;
+  })
+  
+
   //Pan map to the icon
   map.panTo([objectLatitude + 2, objectLongitude]);
   
@@ -871,7 +879,6 @@ function loadIconAndBalloon(){
   //We currently only have the satellite's location in coordinates.
   //We want to get the country name using a reverse geocoding API - https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
   axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=${mapquestAPIKey}&location=${objectLatitude},${objectLongitude}&includeRoadMetadata=true&includeNearestIntersection=true`)
-      
       //If the coordinates correlate with a country the API returns the country's 2 letter code. (example: AE for United Arab Emirates)
       .then(mapresults => {
           //Two letter country code:
@@ -883,7 +890,7 @@ function loadIconAndBalloon(){
 
           //Now that we have the country code, we can convert it to the full name using this function and looks through the freaking huge object I copied and pasted to line 2.
           let fullCountName = convertCountryCode(countryCode);
-          
+
           //Since we know the satellite is above a country, lets create and attach a balloon to the icon with the following information...
           objectIconPlacement.bindPopup(`
           <div class="balloon">
@@ -894,7 +901,12 @@ function loadIconAndBalloon(){
             <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <b>---</b> <em>${objectVelocityMPS} mi/s</em></p>
             <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</em></p>
           </div>
-          `).openPopup();
+          `);
+
+          //If boolean is true, this balloon will be displayed.
+          if(balloonOpen === true){
+            objectIconPlacement.openPopup();
+          }
       })
 
       //If the coordinates do not correlate with a country the API returns an error.
@@ -909,7 +921,12 @@ function loadIconAndBalloon(){
             <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <b>---</b> <em>${objectVelocityMPS} mi/s</em></p>
             <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</em></p>
           </div>
-          `).openPopup();
+          `);
+
+          //If boolean is true, this balloon will be displayed.
+          if(balloonOpen === true){
+            objectIconPlacement.openPopup();
+          }
       })
 }
 
