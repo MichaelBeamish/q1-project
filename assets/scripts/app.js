@@ -777,13 +777,14 @@ function getObjectCoordinates(){
 axios.get(objectURL)
   .then(results => {
       //GET OBJECT COORDINATES
+      //Example (ISS): https://www.n2yo.com/rest/v1/satellite/positions/25544/0/0/0/1/&apiKey=HL2GHH-QXV5ZF-U6CVPA-3VMK
       objectName = results.data.info.satname;
       objectLatitude = results.data.positions[0].satlatitude;
       objectLongitude = results.data.positions[0].satlongitude;
       coordinatesString = `${Math.round(objectLatitude * 100000) / 100000}, ${Math.round(objectLongitude * 100000) / 100000}`;
       objectAltitude = Math.round((results.data.positions[0].sataltitude * 0.621371) * 100) / 100;
       
-      //API doesn't provide the speed of the satellite.
+      //Endpoint doesn't provide the speed of the satellite.
       //It only provides the number of orbits in 24 hours.
       //We need a function to do some math for us.
       calculateObjectSpeed();
@@ -809,7 +810,9 @@ axios.get(objectURL)
 function calculateObjectSpeed(){
   axios.get(objectURLorbits)
     .then(results => {
-        //API returns a string of satellite information that we split into an array.
+        //Endpoint returns a string of satellite information that we split into an array.
+        // Example (geostationary SES1): https://www.n2yo.com/rest/v1/satellite/tle/36516&apiKey=HL2GHH-QXV5ZF-U6CVPA-3VMK
+        // Example (ISS): https://www.n2yo.com/rest/v1/satellite/tle/25544&apiKey=HL2GHH-QXV5ZF-U6CVPA-3VMK
         let objectOrbits = results.data.tle.split(' ');
         //The last item in the array is the number Earth orbits in 24 hours.
         let objectOrbitsPerDay = objectOrbits[objectOrbits.length - 1];
@@ -892,6 +895,7 @@ function loadIconAndBalloon(){
           let fullCountName = convertCountryCode(countryCode);
 
           //Since we know the satellite is above a country, lets create and attach a balloon to the icon with the following information...
+          //Flags API example: https://www.countryflags.io/et/shiny/64.png    uses   https://countryflags.io/
           objectIconPlacement.bindPopup(`
           <div class="balloon">
             <h3><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
@@ -902,6 +906,7 @@ function loadIconAndBalloon(){
             <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</em></p>
           </div>
           `);
+          
 
           //If boolean is true, this balloon will be displayed.
           if(balloonOpen === true){
@@ -922,6 +927,7 @@ function loadIconAndBalloon(){
             <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</em></p>
           </div>
           `);
+
 
           //If boolean is true, this balloon will be displayed.
           if(balloonOpen === true){
@@ -966,6 +972,7 @@ buttons.forEach(el => {
     objectID = e.target.value;
     //Use the specific satellite's endpoint.
     objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
+    objectURLorbits = `https://www.n2yo.com/rest/v1/satellite/tle/${objectID}&apiKey=${objectAPIKey}`;
     //Create icon...
     createIcon();
     //Get the satellite's information and add the icon and balloon to map...
