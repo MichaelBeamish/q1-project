@@ -1,4 +1,4 @@
-//ALL COUNTRY ABREVIATIONS TO FULL NAME
+//ALL COUNTRY ABREVIATIONS AND FULL NAMES
 const isoCountries = {
   'AF' : {
     name: 'Afghanistan',
@@ -739,7 +739,7 @@ const isoCountries = {
     name: 'Zimbabwe'
   },
 };
-//FUNCTION TO CONVERT CODES
+//FUNCTION TO CONVERT COUNTRY CODES TO FULL COUNTRY NAME
 convertCountryCode = (code) => {
   return isoCountries[code].name;
 }
@@ -754,7 +754,7 @@ let mapquestAPIKey = 'qIMsoHWGonAkGLA0afmJDHavRdrFNASo';
 let objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
 let objectURLorbits = `https://www.n2yo.com/rest/v1/satellite/tle/${objectID}&apiKey=${objectAPIKey}`;
 
-//SAT POSITION VARIABLES
+//SATELLITE VARIABLES
 let objectName;
 let objectLatitude;
 let objectLongitude;
@@ -782,15 +782,21 @@ axios.get(objectURL)
       objectLongitude = results.data.positions[0].satlongitude;
       coordinatesString = `${Math.round(objectLatitude * 100000) / 100000}, ${Math.round(objectLongitude * 100000) / 100000}`;
       objectAltitude = Math.round((results.data.positions[0].sataltitude * 0.621371) * 100) / 100;
+      
+      //API doesn't provide the speed of the satellite.
+      //It only provides the number of orbits in 24 hours.
+      //We need a function to do some math for us.
       calculateObjectSpeed();
 
-      //If the map has been loaded, don't load it again.
+      //If the map hasn't been loaded yet then load it!
       if(maploadedBoolean === false){
         maploadedBoolean = true;
         loadMap();
-        loadIcon();
-        updateIconAndBalloon();
+        createIcon();
       }
+
+      //This timer variable is what updates the satellite icon on the map.
+      //If it hasn't been started yet then start it!
       if(timerloadedBoolean === false){
         timerloadedBoolean = true;
         //Call update function every 3 seconds.
@@ -803,21 +809,34 @@ axios.get(objectURL)
 function calculateObjectSpeed(){
   axios.get(objectURLorbits)
     .then(results => {
-        //GET OBJECT ORBITS
+        //API returns a string of satellite information that we split into an array.
         let objectOrbits = results.data.tle.split(' ');
+        //The last item in the array is the number Earth orbits in 24 hours.
         let objectOrbitsPerDay = objectOrbits[objectOrbits.length - 1];
+
+        //We want to get the speed of the satellite in MPH.
+        //Speed = distance traveld in hour.
+        //Our distance will be the circumference of the satellite's orbit.
+        //The radius is the Earth's radius (3950 miles) + the satellite's altitude.
         let objectRadius = 3950 + objectAltitude;
+        //Circumference = radius * 2 * PI.
         let objectCircum = objectRadius * 2 * Math.PI;
+        //Number of orbits in an hour...
         let objectOrbitsPerHour = Number(objectOrbitsPerDay) / 24;
+        //Speed of satellite in mph = satellite circumference times number of orbits per hour.
         objectVelocityMPH = Math.round((objectCircum * objectOrbitsPerHour) * 100) / 100;
+        //Speed of satellite in mi/s = speed mph divided by 3600.
         objectVelocityMPS = Math.round((objectVelocityMPH / 3600) * 100) / 100;
-        objectVelocityMPH = objectVelocityMPH.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); //Format number to include commas.
+        //Format numbers to include commas.
+        objectVelocityMPH = objectVelocityMPH.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         objectVelocityMPS = objectVelocityMPS.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     })
   }
 
+
+//LOAD MAP
 function loadMap(){
-  //LOAD MAP WITH OBJECT COORDINATES using Mapquest https://developer.mapquest.com/documentation/mapquest-js/v1.3/
+  //Mapquest API https://developer.mapquest.com/documentation/mapquest-js/v1.3/
   //API DOCUMENTATION https://leafletjs.com/reference-1.3.0.html
   // 'map' refers to a <div> element with the ID map
   L.mapquest.key = mapquestAPIKey;
@@ -828,8 +847,8 @@ function loadMap(){
   });
 }
 
-function loadIcon(){
-    //ICON
+//CREATE ICON
+function createIcon(){
     objectIcon = L.icon({
       iconUrl: `assets/images/${objectID}.png`,
       iconSize: [60, 60],
@@ -841,23 +860,31 @@ function loadIcon(){
   });
 }
 
-function updateIconAndBalloon(){
-  //Add Marker
+//LOAD ICON and BALLOON
+function loadIconAndBalloon(){
+  //Place Icon
   objectIconPlacement = L.marker([objectLatitude, objectLongitude], {icon: objectIcon}).addTo(map);
+  //Pan map to the icon
   map.panTo([objectLatitude + 2, objectLongitude]);
-  //Add Balloon
-  //GET COUNTRY NAME using REVERSE GEOCODING API - https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
+  
+  //Create and Place Balloon:
+  //We currently only have the satellite's location in coordinates.
+  //We want to get the country name using a reverse geocoding API - https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
   axios.get(`http://www.mapquestapi.com/geocoding/v1/reverse?key=${mapquestAPIKey}&location=${objectLatitude},${objectLongitude}&includeRoadMetadata=true&includeNearestIntersection=true`)
       
-      //IF OBJECT IS OVER A COUNTRY
+      //If the coordinates correlate with a country the API returns the country's 2 letter code. (example: AE for United Arab Emirates)
       .then(mapresults => {
-          //RETURNS COUNTRY AS 2 LETTER CODE
+          //Two letter country code:
           let countryCode = mapresults.data.results[0].locations[0].adminArea1;
+          //State name:
           let stateName = mapresults.data.results[0].locations[0].adminArea3;
+          //City name:
           let cityName = mapresults.data.results[0].locations[0].adminArea5;
-          //CONVERTS ABBREVIATION TO FULL COUNTRY NAME
+
+          //Now that we have the country code, we can convert it to the full name using this function and looks through the freaking huge object I copied and pasted to line 2.
           let fullCountName = convertCountryCode(countryCode);
           
+          //Since we know the satellite is above a country, lets create and attach a balloon to the icon with the following information...
           objectIconPlacement.bindPopup(`
           <div class="balloon">
             <h3><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
@@ -870,8 +897,9 @@ function updateIconAndBalloon(){
           `).openPopup();
       })
 
-      //IF OBJECT ISN'T OVER A COUNTRY
+      //If the coordinates do not correlate with a country the API returns an error.
       .catch(mapresults => {
+          //Lets than create and attach a balloon to the icon with the following information...
           objectIconPlacement.bindPopup(`
           <div class="balloon">
             <h3><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
@@ -887,35 +915,46 @@ function updateIconAndBalloon(){
 
 
 
-//START UPDATE PROCESS
+//This update function is called every 3 seconds when active.
 function startUpdates(){
+  //It first removes the icon and it's balloon from the map if there is one...
   if(objectIconPlacement !== undefined){
     objectIconPlacement.remove(map);
   }
-  updateIconAndBalloon();
+  //Retrieves updated information from the API...
   getObjectCoordinates();
+  //And creates a new icon and balloon and adds it to the map.
+  loadIconAndBalloon();
 }
 
-//STOP UPDATE PROCESS
+//When this function is called it stops the above timer function.
 function stopUpdates() {
   clearInterval(timer);
 }
 
 
-//ADD EVENT LISTENERS TO OBJECT BUTTONS
+//EVENT LISTENERS FOR BUTTONS:
+//Create an array like object to keep track of anything with a .space-button class.
 let buttons = document.querySelectorAll(".space-button");
+//Add an event listener to each item in the array like object.
 buttons.forEach(el => {
+  //If the button is clicked...
   el.addEventListener('click', (e) => {
+    //Stop the update timer...
     stopUpdates();
     timerloadedBoolean = false;
+    //This Variable is for the wikipedia link in the icon's balloon.
     objectWiki = e.target.name;
+    //Create the satellite id using the target's value.
     objectID = e.target.value;
+    //Use the specific satellite's endpoint.
     objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
+    //Create icon...
+    createIcon();
+    //Get the satellite's information and add the icon and balloon to map...
     getObjectCoordinates();
-    loadIcon();
   })
 })
 
-
-//BEGIN!! First function called here.
+//BEGIN! This is the first function called.
 getObjectCoordinates();
