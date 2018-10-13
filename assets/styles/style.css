@@ -1,63 +1,68 @@
-body {
-    background-color: black;
-    margin-left: 5em;
-    margin-right: 5em;
+.my-container{
+    margin: 1%;
+    padding: 1%;
 }
 
-.container {
-    background-color: crimson;
-}
-
-header {
-    margin-top: 1em;
-    background-color: darkgreen;
-    height: 5em;
-    border-top-left-radius: 50px;
-    border-top-right-radius: 50px;
-}
-
-h1 {
-    font-size: 50px;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    font-style: oblique;
-}
-
-footer {
-    background-color: darkgreen;
-    height: 5em;
-    border-bottom-left-radius: 50px;
-    border-bottom-right-radius: 50px;
-    font-style: italic;
-}
-
-nav {
-    background-color: darkslategrey;
-    height: 5em;
-}
-
-.aligner {
+.map-container{
     display: flex;
-    align-items: center;
     justify-content: center;
-  }
-
-button {
-    margin: 6em;
-    width: 10em;
-    height: 2em;
-    background-color: crimson;
 }
 
-.inner-container {
-    height: 90%;
+.opaque{
+    opacity: 1;
 }
 
 .balloon {
+    font-family: 'Gugi', cursive;
     text-align: center;
 }
 
-#map {
+.map-lg {
     border: 5px;
     border-style: groove;
     border-radius: 5px;
+    width: 80%;
+    padding-top: 40%;
+    
+    margin: 1em;
+}
+
+.space-bg-img{
+    background:url(../images/space-bg.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+  }
+
+.footer {
+    color: white;
+    text-align: center;
+}
+
+.gugi-font{
+    font-family: 'Gugi', cursive;
+}
+
+a {
+    color: #ff2800;
+    text-decoration: none;
+}
+a:hover 
+{
+     color:#00A0C6; 
+     text-decoration:none; 
+     cursor:pointer;  
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.space-button{
+    margin: 2px;
+}
+
+.navbar-brand{
+    font-size: 2em;
 }

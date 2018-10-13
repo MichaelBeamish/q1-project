@@ -5,6 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Satellite Tracker</title>
+    <!-- GOOGLE FONTS -->
+    <link href="https://fonts.googleapis.com/css?family=Gugi" rel="stylesheet">
+    <!-- BOOSTRAP CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <!-- BOOTSTRAP SCRIPT -->
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous" defer></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous" defer></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js" integrity="sha384-pjaaA8dDz/5BgdFUPX6M/9SUZv4d12SUPF0axWc+VRZkx5xU3daN+lYb49+Ax+Tl" crossorigin="anonymous" defer></script>
     <!-- My CSS -->
     <link rel="stylesheet" type="text/css" media="screen" href="assets/styles/style.css" />
     <!-- Mapquest CSS -->
@@ -16,26 +24,52 @@
     <!-- My JS -->
     <script src="assets/scripts/app.js" defer></script>
 </head>
-<body>
-
-    <header class="aligner">
-        <h1>Satellite Tracker</h1>
-    </header>
-
-    <nav class="aligner">
-        <button class="space-button" name="ISS" value="25544">ISS</button>
-        <button class="space-button" name="SES-1" value="36516">SES-1</button>
-        <button class="space-button" name="GOES-13" value="29155">GOES-13</button>
-        <button class="space-button" name="NOAA-19" value="33591">NOAA-19</button>
-        <button class="space-button" name="EOS AM-1" value="25994">TERRA</button>
-    </nav>
+<body class="space-bg-img">
     
-    <main class="aligner container">        
-        <div id="map" style="width: 1600px; height: 700px"></div>
-    </main>
+    <nav class="navbar navbar-expand-lg navbar-light opaque">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="gugi-font text-warning">[ ↓ ]</span>
+        </button>
+        
+        <a class="navbar-brand gugi-font text-warning" href="#">Satellite Tracker</a>
 
-    <footer class="aligner">
-        <p>Created by: <a href="https://www.linkedin.com/in/michael-beamish/" target="_blank">Michael Beamish</a> - August 2018</p>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item">
+                <button class="space-button btn btn-outline-warning btn-lg gugi-font" name="ISS" value="25544">ISS</button>
+            </li>
+            <li class="nav-item">
+                <button class="space-button btn btn-outline-warning btn-lg gugi-font" name="SES-1" value="36516">SES-1</button>
+            </li>
+            <li class="nav-item">
+                <button class="space-button btn btn-outline-warning btn-lg gugi-font" name="GOES-13" value="29155">GOES-13</button>
+            </li>                        
+            <li class="nav-item">
+                <button class="space-button btn btn-outline-warning btn-lg gugi-font" name="NOAA-19" value="33591">NOAA-19</button>
+            </li>
+            <li class="nav-item">
+                <button class="space-button btn btn-outline-warning btn-lg gugi-font" name="EOS AM-1" value="25994">TERRA</button>
+            </li>
+            </ul>
+        </div>
+    </nav>  
+
+    <div class="my-container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="map-container">
+                    <div id="map" class="map-lg"></div>
+                </div>
+            </div>
+        </div>        
+    </div>
+
+    <footer class="footer">
+        <div class="row">
+            <div class="col-md-12">
+                <p class="gugi-font text-warning">Created by: <a href="https://www.linkedin.com/in/michael-beamish/" target="_blank">Michael Beamish</a></p><p class="gugi-font text-warning">August 2018</p>
+            </div>
+        </div>    
     </footer>
 
 </body>

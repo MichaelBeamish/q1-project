@@ -843,9 +843,9 @@ function loadMap(){
   // 'map' refers to a <div> element with the ID map
   L.mapquest.key = mapquestAPIKey;
   map = L.mapquest.map('map', {
-    center: [objectLatitude + 2, objectLongitude],
+    center: [objectLatitude + 1000, objectLongitude + 1000],
     layers: L.mapquest.tileLayer('map'),
-    zoom: 5
+    zoom: 3
   });
 }
 
@@ -854,11 +854,11 @@ function createIcon(){
     objectIcon = L.icon({
       iconUrl: `assets/images/${objectID}.png`,
       iconSize: [60, 60],
-      iconAnchor: [22, 94],
-      popupAnchor: [-3, -76],
-      shadowUrl: `assets/images/${objectID}.png`,
-      shadowSize: [15, 15],
-      shadowAnchor: [15, 15]
+      iconAnchor: [30, 30],
+      popupAnchor: [0, -30],
+      // shadowUrl: `assets/images/${objectID}.png`,
+      // shadowSize: [16, 16],
+      // shadowAnchor: [8, 8]
   });
 }
 
@@ -874,7 +874,7 @@ function loadIconAndBalloon(){
   })
   
   //Pan map to the icon
-  map.panTo([objectLatitude + 2, objectLongitude]);
+  map.panTo([objectLatitude, objectLongitude]);
   
   //Create and Place Balloon:
   //We currently only have the satellite's location in coordinates.
@@ -894,16 +894,29 @@ function loadIconAndBalloon(){
 
           //Since we know the satellite is above a country, lets create and attach a balloon to the icon with the following information...
           //Flags API example: https://www.countryflags.io/et/shiny/64.png    uses   https://countryflags.io/
-          objectIconPlacement.bindPopup(`
-          <div class="balloon">
-            <h3><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
-            <h4>Over ${cityName} ${stateName} ${fullCountName}</h4>
-            <a href="https://en.wikipedia.org/wiki/${fullCountName}" target="_blank"><img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img></a>
-            <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
-            <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <b>---</b> <em>${objectVelocityMPS} mi/s</em></p>
-            <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</em></p>
-          </div>
-          `);
+
+          let popup = L.popup({closeButton: false})
+            .setContent(`
+            <div class="row d-none d-md-block">
+              <div class="col-lg-12">
+                <div class="balloon">
+                  <h3><a class="text-warning" href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
+                  <small>(click to view satellite info)</small>
+                  <p><strong>Over:</strong> <em>${cityName} ${stateName}, ${fullCountName}</em></p>
+                  <a href="https://en.wikipedia.org/wiki/${fullCountName}" target="_blank"><img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img></a><br>
+                  <small>(click to view country info)</small>
+                  <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
+                  <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <em>(${objectVelocityMPS} mi/sec</em>)</p>
+                  <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</em></p>
+                </div>
+              </div>
+            </div>
+
+            <p class="d-none d-sm-block d-md-none">${objectName}</p>
+            <p class="d-block d-sm-none">${objectName}</p>            
+            `);
+
+          objectIconPlacement.bindPopup(popup);
           
           //If boolean is true, this balloon will be displayed.
           if(balloonOpen === true){
@@ -914,16 +927,26 @@ function loadIconAndBalloon(){
       //If the coordinates do not correlate with a country the API returns an error.
       .catch(mapresults => {
           //Lets than create and attach a balloon to the icon with the following information...
-          objectIconPlacement.bindPopup(`
+
+          let popup = L.popup({closeButton: false})
+          .setContent(`
+          <div class="row d-none d-md-block">
+          <div class="col-lg-12">
           <div class="balloon">
-            <h3><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
-            <h4>Not currently over a country.</h4>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_the_World_Ocean_%28Proposal%29.PNG" width="64"></img>
+            <h3><a class="text-warning" href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
+            <small>(click to view satellite info)</small>
             <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
-            <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <b>---</b> <em>${objectVelocityMPS} mi/s</em></p>
+            <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <em>(${objectVelocityMPS} mi/sec</em>)</p>
             <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</em></p>
           </div>
+          </div>
+          </div>
+
+          <p class="d-none d-sm-block d-md-none">${objectName}</p>
+          <p class="d-block d-sm-none">${objectName}</p>    
           `);
+
+          objectIconPlacement.bindPopup(popup);
 
           //If boolean is true, this balloon will be displayed.
           if(balloonOpen === true){
