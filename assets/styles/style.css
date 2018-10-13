@@ -21,7 +21,7 @@
     border: 5px;
     border-style: groove;
     border-radius: 5px;
-    width: 80%;
+    width: 100%;
     padding-top: 40%;
     
     margin: 1em;
@@ -64,5 +64,5 @@ a:hover
 }
 
 .navbar-brand{
-    font-size: 2em;
+    font-size: 1.5em;
 }
