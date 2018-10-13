@@ -912,8 +912,19 @@ function loadIconAndBalloon(){
               </div>
             </div>
 
-            <p class="d-none d-sm-block d-md-none">${objectName}</p>
-            <p class="d-block d-sm-none">${objectName}</p>            
+            <div class="d-none d-sm-block d-md-none">
+              <small><b>${objectName}</b></small><br>
+              <small>Coordinates: ${coordinatesString}</small><br>
+              <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
+              <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</small>
+            </div>
+
+            <div class="d-block d-sm-none">
+              <small><b>${objectName}</b></small><br>
+              <small>Coordinates: ${coordinatesString}</small><br>
+              <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
+              <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</small>
+            </div>         
             `);
 
           objectIconPlacement.bindPopup(popup);
@@ -942,8 +953,19 @@ function loadIconAndBalloon(){
           </div>
           </div>
 
-          <p class="d-none d-sm-block d-md-none">${objectName}</p>
-          <p class="d-block d-sm-none">${objectName}</p>    
+          <div class="d-none d-sm-block d-md-none">
+            <small><b>${objectName}</b></small><br>
+            <small>Coordinates: ${coordinatesString}</small><br>
+            <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
+            <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</small>
+          </div>
+
+          <div class="d-block d-sm-none">
+            <small><b>${objectName}</b></small><br>
+            <small>Coordinates: ${coordinatesString}</small><br>
+            <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
+            <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</small>
+          </div>
           `);
 
           objectIconPlacement.bindPopup(popup);
