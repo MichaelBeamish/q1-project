@@ -20,19 +20,17 @@
 .map-lg {
     border: 5px;
     border-style: groove;
+    border-color: grey;
     border-radius: 5px;
-    width: 100%;
-    padding-top: 40%;
-    
+    width: 100vw;
+    height:75vmin;
     margin: 1em;
 }
 
 .space-bg-img{
-    background:url(../images/space-bg.jpg) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+    background:url(../images/space-bg.jpg);
+    height: 100%;
+    width: auto;
   }
 
 .footer {
