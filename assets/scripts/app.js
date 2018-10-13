@@ -845,7 +845,7 @@ function loadMap(){
   map = L.mapquest.map('map', {
     center: [objectLatitude, objectLongitude],
     layers: L.mapquest.tileLayer('map'),
-    zoom: 3
+    zoom: 2.5
   });
 }
 
@@ -874,7 +874,7 @@ function loadIconAndBalloon(){
   })
   
   //Pan map to the icon
-  map.panTo([objectLatitude + 10, objectLongitude]);
+  map.panTo([objectLatitude + 5, objectLongitude]);
   
   //Create and Place Balloon:
   //We currently only have the satellite's location in coordinates.
