@@ -746,9 +746,16 @@ convertCountryCode = (code) => {
 
 
 // Navbar Click
+let navBtnBool = false;
 let navBtn = document.getElementById('nav-btn');
 navBtn.addEventListener('click', (e) => {
-  navBtn.innerText = "[ ↑ ]";
+  if(navBtnBool === false){
+    navBtn.innerText = "[ ↑ ]";
+    navBtnBool = true;
+  } else {
+    navBtn.innerText = "[ ↓ ]";
+    navBtnBool = false;
+  }
 })
 
 //SATELLITE VARIABLES
@@ -780,6 +787,7 @@ let timer;
 let balloonOpen = false;
 let updateCounter = 1;
 let isGeoStationary = '';
+let buttonClickTimer = 0;
 
 //GET OBJECT LATITUDE & LONGITUDE:
 function getObjectCoordinates(){
@@ -1003,7 +1011,12 @@ function panToMap(){
   } else if(updateCounter === 10){
     updateCounter = 0;
   }
-  updateCounter++; 
+  updateCounter++;
+  buttonClickTimer++;
+  
+  if(buttonClickTimer === 1){
+    enableButtons();
+  }
 }
 
 
@@ -1037,6 +1050,10 @@ buttons.forEach(el => {
     //Close Navbar
     $(".navbar-collapse").collapse('hide');
     navBtn.innerText = "[ ↓ ]";
+    navBtnBool = false;
+
+    disableButtons();
+    buttonClickTimer = 0;
 
     //Stop the update timer...
     stopUpdates();
@@ -1058,3 +1075,24 @@ buttons.forEach(el => {
 
 //BEGIN! This is the first function called.
 getObjectCoordinates();
+
+
+//Disable button for a few moments to allow load.
+function disableButtons(){
+  let buttons = document.querySelectorAll(".space-button");
+  buttons.forEach(el => {
+
+    el.disabled = true;
+    buttonClickTimer = 0;
+
+  })
+}
+//Enable buttons.
+function enableButtons(){
+  let buttons = document.querySelectorAll(".space-button");
+  buttons.forEach(el => {
+
+    el.disabled = false;
+
+  })
+}
