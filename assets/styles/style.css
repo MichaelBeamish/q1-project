@@ -14,7 +14,8 @@
 
 .balloon {
     font-family: 'Gugi', cursive;
-    text-align: center;
+    line-height: 0.5;
+    text-align: left;
 }
 
 .map-lg {

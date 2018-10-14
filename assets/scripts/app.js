@@ -744,6 +744,13 @@ convertCountryCode = (code) => {
   return isoCountries[code].name;
 }
 
+
+// Navbar Click
+let navBtn = document.getElementById('nav-btn');
+navBtn.addEventListener('click', (e) => {
+  navBtn.innerText = "[ ↑ ]";
+})
+
 //SATELLITE VARIABLES
 //Page will always load ISS first.
 let objectID = '25544';
@@ -771,6 +778,8 @@ let maploadedBoolean = false;
 let timerloadedBoolean = false;
 let timer;
 let balloonOpen = false;
+let updateCounter = 1;
+let isGeoStationary = '';
 
 //GET OBJECT LATITUDE & LONGITUDE:
 function getObjectCoordinates(){
@@ -782,6 +791,12 @@ axios.get(objectURL)
       objectLongitude = results.data.positions[0].satlongitude;
       coordinatesString = `${Math.round(objectLatitude * 100000) / 100000}, ${Math.round(objectLongitude * 100000) / 100000}`;
       objectAltitude = Math.round((results.data.positions[0].sataltitude * 0.621371) * 100) / 100;
+
+      if(objectAltitude > 22000 && objectAltitude < 23000){
+        isGeoStationary = "(geostationary)";
+      } else {
+        isGeoStationary = "";
+      }
       
       //Endpoint doesn't provide the speed of the satellite.
       //It only provides the number of orbits in 24 hours.
@@ -853,9 +868,9 @@ function loadMap(){
 function createIcon(){
     objectIcon = L.icon({
       iconUrl: `assets/images/${objectID}.png`,
-      iconSize: [60, 60],
-      iconAnchor: [30, 30],
-      popupAnchor: [0, -30],
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -15],
       // shadowUrl: `assets/images/${objectID}.png`,
       // shadowSize: [16, 16],
       // shadowAnchor: [8, 8]
@@ -872,9 +887,6 @@ function loadIconAndBalloon(){
   objectIconPlacement.addEventListener('click', () => {
     balloonOpen = !balloonOpen;
   })
-  
-  //Pan map to the icon
-  map.panTo([objectLatitude + 5, objectLongitude]);
   
   //Create and Place Balloon:
   //We currently only have the satellite's location in coordinates.
@@ -900,14 +912,14 @@ function loadIconAndBalloon(){
             <div class="row d-none d-md-block">
               <div class="col-lg-12">
                 <div class="balloon">
-                  <h3><a class="text-warning" href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
-                  <small>(click to view satellite info)</small>
-                  <p><strong>Over:</strong> <em>${cityName} ${stateName}, ${fullCountName}</em></p>
+                  <h3><a class="text-warning inline" href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
+                  <small>(click to view satellite info)</small><br>
                   <a href="https://en.wikipedia.org/wiki/${fullCountName}" target="_blank"><img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img></a><br>
                   <small>(click to view country info)</small>
+                  <p><strong>Over:</strong> <em>${cityName} ${stateName}, ${fullCountName}</em></p>
                   <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
                   <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <em>(${objectVelocityMPS} mi/sec</em>)</p>
-                  <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</em></p>
+                  <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</em></p><small> ${isGeoStationary}</small>
                 </div>
               </div>
             </div>
@@ -916,14 +928,16 @@ function loadIconAndBalloon(){
               <small><b>${objectName}</b></small><br>
               <small>Coordinates: ${coordinatesString}</small><br>
               <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
-              <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</small>
+              <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/16.png"></img>
+              <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}. ${isGeoStationary}</small>
             </div>
 
             <div class="d-block d-sm-none">
               <small><b>${objectName}</b></small><br>
               <small>Coordinates: ${coordinatesString}</small><br>
               <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
-              <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</small>
+              <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/16.png"></img>
+              <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}. ${isGeoStationary}</small>
             </div>         
             `);
 
@@ -933,6 +947,8 @@ function loadIconAndBalloon(){
           if(balloonOpen === true){
             objectIconPlacement.openPopup();
           }
+
+          panToMap();
       })
 
       //If the coordinates do not correlate with a country the API returns an error.
@@ -948,7 +964,7 @@ function loadIconAndBalloon(){
             <small>(click to view satellite info)</small>
             <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
             <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <em>(${objectVelocityMPS} mi/sec</em>)</p>
-            <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</em></p>
+            <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</em></p><small> ${isGeoStationary}</small>
           </div>
           </div>
           </div>
@@ -957,14 +973,14 @@ function loadIconAndBalloon(){
             <small><b>${objectName}</b></small><br>
             <small>Coordinates: ${coordinatesString}</small><br>
             <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
-            <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</small>
+            <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth. ${isGeoStationary}</small>
           </div>
 
           <div class="d-block d-sm-none">
             <small><b>${objectName}</b></small><br>
             <small>Coordinates: ${coordinatesString}</small><br>
             <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
-            <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</small>
+            <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth. ${isGeoStationary}</small>
           </div>
           `);
 
@@ -973,8 +989,21 @@ function loadIconAndBalloon(){
           //If boolean is true, this balloon will be displayed.
           if(balloonOpen === true){
             objectIconPlacement.openPopup();
-          }
+          }         
+
+          panToMap();
+
       })
+}
+
+//Pan map to the icon
+function panToMap(){
+  if(updateCounter === 1){
+    map.panTo([objectLatitude, objectLongitude]);
+  } else if(updateCounter === 10){
+    updateCounter = 0;
+  }
+  updateCounter++; 
 }
 
 
@@ -1004,6 +1033,11 @@ let buttons = document.querySelectorAll(".space-button");
 buttons.forEach(el => {
   //If the button is clicked...
   el.addEventListener('click', (e) => {
+
+    //Close Navbar
+    $(".navbar-collapse").collapse('hide');
+    navBtn.innerText = "[ ↓ ]";
+
     //Stop the update timer...
     stopUpdates();
     timerloadedBoolean = false;
@@ -1014,6 +1048,7 @@ buttons.forEach(el => {
     //Use the specific satellite's endpoint.
     objectURL = `https://www.n2yo.com/rest/v1/satellite/positions/${objectID}/0/0/0/1/&apiKey=${objectAPIKey}`;
     objectURLorbits = `https://www.n2yo.com/rest/v1/satellite/tle/${objectID}&apiKey=${objectAPIKey}`;
+    updateCounter = 1;
     //Create icon...
     createIcon();
     //Get the satellite's information and add the icon and balloon to map...
