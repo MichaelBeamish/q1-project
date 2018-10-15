@@ -950,10 +950,8 @@ function loadIconAndBalloon(){
             <div class="row d-none d-md-block">
               <div class="col-lg-12">
                 <div class="balloon">
-                  <h3><a class="text-warning inline" href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
-                  <small>(click to view satellite info)</small><br>
+                  <h3><a class="text-warning" href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
                   <a href="https://en.wikipedia.org/wiki/${fullCountName}" target="_blank"><img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img></a><br>
-                  <small>(click to view country info)</small>
                   <p><strong>OVER:</strong> <em>${cityName} ${stateName} ${fullCountName}</em></p>
                   <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
                   <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</em></p><small> ${isGeoStationary}</small>
@@ -999,7 +997,6 @@ function loadIconAndBalloon(){
           <div class="col-lg-12">
           <div class="balloon">
             <h3><a class="text-warning" href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
-            <small>(click to view satellite info)</small>
             <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
             <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</em></p><small> ${isGeoStationary}</small>
             <p><strong>SPEED:</strong> <em>${objectVelocityMPH} mph</em> <em>(${objectVelocityMPS} mi/sec</em>)</p>
