@@ -926,8 +926,10 @@ function loadIconAndBalloon(){
           let countryCode = mapresults.data.results[0].locations[0].adminArea1;
           //State name:
           let stateName = mapresults.data.results[0].locations[0].adminArea3;
+          stateName+=',';
           //City name:
           let cityName = mapresults.data.results[0].locations[0].adminArea5;
+          cityName+=',';
 
           //Now that we have the country code, we can convert it to the full name using this function and looks through the freaking huge object I copied and pasted to line 2.
           let fullCountName = convertCountryCode(countryCode);
@@ -944,7 +946,7 @@ function loadIconAndBalloon(){
                   <small>(click to view satellite info)</small><br>
                   <a href="https://en.wikipedia.org/wiki/${fullCountName}" target="_blank"><img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img></a><br>
                   <small>(click to view country info)</small>
-                  <p><strong>OVER:</strong> <em>${cityName} ${stateName}, ${fullCountName}</em></p>
+                  <p><strong>OVER:</strong> <em>${cityName} ${stateName} ${fullCountName}</em></p>
                   <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
                   <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</em></p><small> ${isGeoStationary}</small>
                   <p><strong>SPEED:</strong> <em>${objectVelocityMPH} mph</em> <em>(${objectVelocityMPS} mi/sec</em>)</p>
