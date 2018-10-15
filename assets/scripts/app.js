@@ -926,10 +926,18 @@ function loadIconAndBalloon(){
           let countryCode = mapresults.data.results[0].locations[0].adminArea1;
           //State name:
           let stateName = mapresults.data.results[0].locations[0].adminArea3;
-          stateName+=',';
+          if(stateName.length > 0){
+            stateName+=',';
+          } else {
+            stateName='';
+          }
           //City name:
           let cityName = mapresults.data.results[0].locations[0].adminArea5;
-          cityName+=',';
+          if(cityName.length > 0){
+            cityName+=',';
+          } else {
+            cityName='';
+          }
 
           //Now that we have the country code, we can convert it to the full name using this function and looks through the freaking huge object I copied and pasted to line 2.
           let fullCountName = convertCountryCode(countryCode);
