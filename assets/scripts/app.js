@@ -835,9 +835,25 @@ function calculateObjectSpeed(){
         //Endpoint returns a string of satellite information that we split into an array.
         // Example (geostationary SES1): https://www.n2yo.com/rest/v1/satellite/tle/36516&apiKey=HL2GHH-QXV5ZF-U6CVPA-3VMK
         // Example (ISS): https://www.n2yo.com/rest/v1/satellite/tle/25544&apiKey=HL2GHH-QXV5ZF-U6CVPA-3VMK
+
+        // API doesn't return the speed. Only a long string of digits. Within that string is the number of orbits the satellite does in a day.
+        //To get that specific part of the string I had to do some weird stuff below as the string for each satellite isn't consistantly formatted.
+        //ACCESS ORBITS PER DAY - START
         let objectOrbits = results.data.tle.split(' ');
-        //The last item in the array is the number Earth orbits in 24 hours.
-        let objectOrbitsPerDay = objectOrbits[objectOrbits.length - 1];
+        objectOrbits = objectOrbits.join('');
+        objectOrbits = objectOrbits.split('.');
+        let firstNum = objectOrbits[objectOrbits.length - 2];
+        let temp1 = firstNum[firstNum.length - 2];
+        let temp2 = firstNum[firstNum.length - 1];
+        firstNum = temp1+temp2+'.';
+        let secondNum = objectOrbits[objectOrbits.length - 1];     
+        temp1 = '';
+        for(let i = 0; i < 8; i++){
+          temp1+= secondNum[i];
+        }
+        secondNum = temp1;
+        let objectOrbitsPerDay = firstNum+secondNum;
+        //ACCESS ORBITS PER DAY - END
 
         //We want to get the speed of the satellite in MPH.
         //Speed = distance traveld in hour.
@@ -847,11 +863,15 @@ function calculateObjectSpeed(){
         //Circumference = radius * 2 * PI.
         let objectCircum = objectRadius * 2 * Math.PI;
         //Number of orbits in an hour...
-        let objectOrbitsPerHour = Number(objectOrbitsPerDay) / 24;
+        let objectOrbitsPerHour = Number(objectOrbitsPerDay) / 23.9344444;
         //Speed of satellite in mph = satellite circumference times number of orbits per hour.
         objectVelocityMPH = Math.round((objectCircum * objectOrbitsPerHour) * 100) / 100;
         //Speed of satellite in mi/s = speed mph divided by 3600.
         objectVelocityMPS = Math.round((objectVelocityMPH / 3600) * 100) / 100;
+        //Now that we have the mi/sec we don't need to be so exact with the mph.
+        objectVelocityMPH = Math.round(objectVelocityMPH);
+        //Same with altitude.
+        objectAltitude = Math.round(objectAltitude);
         //Format numbers to include commas.
         objectVelocityMPH = objectVelocityMPH.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         objectVelocityMPS = objectVelocityMPS.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -924,28 +944,28 @@ function loadIconAndBalloon(){
                   <small>(click to view satellite info)</small><br>
                   <a href="https://en.wikipedia.org/wiki/${fullCountName}" target="_blank"><img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/64.png"></img></a><br>
                   <small>(click to view country info)</small>
-                  <p><strong>Over:</strong> <em>${cityName} ${stateName}, ${fullCountName}</em></p>
+                  <p><strong>OVER:</strong> <em>${cityName} ${stateName}, ${fullCountName}</em></p>
                   <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
-                  <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <em>(${objectVelocityMPS} mi/sec</em>)</p>
                   <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}.</em></p><small> ${isGeoStationary}</small>
+                  <p><strong>SPEED:</strong> <em>${objectVelocityMPH} mph</em> <em>(${objectVelocityMPS} mi/sec</em>)</p>
                 </div>
               </div>
             </div>
 
             <div class="d-none d-sm-block d-md-none">
-              <small><b>${objectName}</b></small><br>
+              <small><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></small><br>
               <small>Coordinates: ${coordinatesString}</small><br>
-              <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
-              <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/16.png"></img>
-              <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}. ${isGeoStationary}</small>
+              <small>Above: </small><a href="https://en.wikipedia.org/wiki/${fullCountName}" target="_blank"><img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/16.png"></img></a> <small>${fullCountName}</small><br>
+              <small>Altitude: ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles ${isGeoStationary}</small><br>
+              <small>Speed: ${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small>
             </div>
 
             <div class="d-block d-sm-none">
-              <small><b>${objectName}</b></small><br>
+              <small><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></small><br>
               <small>Coordinates: ${coordinatesString}</small><br>
-              <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
-              <img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/16.png"></img>
-              <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above ${fullCountName}. ${isGeoStationary}</small>
+              <small>Above: </small><a href="https://en.wikipedia.org/wiki/${fullCountName}" target="_blank"><img src="https://www.countryflags.io/${countryCode.toLowerCase()}/shiny/16.png"></img></a> <small>${fullCountName}</small><br>
+              <small>Altitude: ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles ${isGeoStationary}</small><br>
+              <small>Speed: ${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small>
             </div>         
             `);
 
@@ -971,24 +991,24 @@ function loadIconAndBalloon(){
             <h3><a class="text-warning" href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></h3>
             <small>(click to view satellite info)</small>
             <p><strong>COORDINATES:</strong> <em>${coordinatesString}</em></p>
-            <p><strong>VELOCITY:</strong> <em>${objectVelocityMPH} mph</em> <em>(${objectVelocityMPS} mi/sec</em>)</p>
             <p><strong>ALTITUDE:</strong> <em>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth.</em></p><small> ${isGeoStationary}</small>
+            <p><strong>SPEED:</strong> <em>${objectVelocityMPH} mph</em> <em>(${objectVelocityMPS} mi/sec</em>)</p>
           </div>
           </div>
           </div>
 
           <div class="d-none d-sm-block d-md-none">
-            <small><b>${objectName}</b></small><br>
+            <small><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></small><br>
             <small>Coordinates: ${coordinatesString}</small><br>
-            <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
-            <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth. ${isGeoStationary}</small>
+            <small>Altitude: ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles ${isGeoStationary}</small><br>
+            <small>Speed: ${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small>
           </div>
 
           <div class="d-block d-sm-none">
-            <small><b>${objectName}</b></small><br>
+            <small><a href="https://en.wikipedia.org/wiki/${objectWiki}" target="_blank">${objectName}</a></small><br>
             <small>Coordinates: ${coordinatesString}</small><br>
-            <small>${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small><br>
-            <small>${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles above the Earth. ${isGeoStationary}</small>
+            <small>Altitude: ${objectAltitude.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} miles ${isGeoStationary}</small><br>
+            <small>Speed: ${objectVelocityMPH} mph (${objectVelocityMPS} mi/sec</em>)</small>
           </div>
           `);
 
